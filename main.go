@@ -93,6 +93,22 @@ func writeBlock(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+func validBlock(block, prevBlock *Block) bool {
+
+	if prevBlock.Hash != block.PrevHash {
+		return false
+	}
+
+	if !block.validateHash(block.Hash) {
+		return false
+	}
+
+	if prevBlock.Pos+1 != block.Pos {
+		return false
+	}
+	return true
+}
+
 func newAlbum(w http.ResponseWriter, r *http.Request) {
 	var album Album
 	if err := json.NewDecoder(r.Body).Decode(&album); err != nil {
