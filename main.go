@@ -38,7 +38,28 @@ type Album struct {
 	Genre       string `json:"genre"`
 }
 
-var Blockchain *Blockchain
+var blockchain *Blockchain
+
+func writeBlock(w http.ResponseWriter, r *http.Request) {
+	var checkoutItem AlbumCheckout
+	if err := json.NewDecoder(r.Body).Decode(&checkoutItem); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("could not write Block: %v", err)
+		w.Write([]byte("could not write block"))
+		return
+	}
+
+	blockchain.AddBlock(checkoutItem)
+	resp, err := json.MarshalIndent(checkoutItem, "", " ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("could not marshal payload: %v", err)
+		w.Write([]byte("could not write block"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
 
 func newAlbum(w http.ResponseWriter, r *http.Request) {
 	var album Album
