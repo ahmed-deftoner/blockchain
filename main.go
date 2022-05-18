@@ -40,6 +40,17 @@ type Album struct {
 
 var blockchain *Blockchain
 
+func (bc *Blockchain) AddBlock(data AlbumCheckout) {
+
+	prevBlock := bc.blocks[len(bc.blocks)-1]
+
+	block := CreateBlock(prevBlock, data)
+
+	if validBlock(block, prevBlock) {
+		bc.blocks = append(bc.blocks, block)
+	}
+}
+
 func writeBlock(w http.ResponseWriter, r *http.Request) {
 	var checkoutItem AlbumCheckout
 	if err := json.NewDecoder(r.Body).Decode(&checkoutItem); err != nil {
