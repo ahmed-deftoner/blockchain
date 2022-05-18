@@ -81,7 +81,7 @@ func writeBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blockchain.AddBlock(checkoutItem)
+	BlockChain.AddBlock(checkoutItem)
 	resp, err := json.MarshalIndent(checkoutItem, "", " ")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -139,6 +139,17 @@ func newAlbum(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
+}
+
+func getBlockchain(w http.ResponseWriter, r *http.Request) {
+	jbytes, err := json.MarshalIndent(BlockChain.blocks, "", " ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	io.WriteString(w, string(jbytes))
 }
 
 func GenesisBlock() *Block {
