@@ -109,6 +109,14 @@ func validBlock(block, prevBlock *Block) bool {
 	return true
 }
 
+func (b *Block) validateHash(hash string) bool {
+	b.generateHash()
+	if b.Hash != hash {
+		return false
+	}
+	return true
+}
+
 func newAlbum(w http.ResponseWriter, r *http.Request) {
 	var album Album
 	if err := json.NewDecoder(r.Body).Decode(&album); err != nil {
