@@ -1,6 +1,10 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -36,11 +40,35 @@ type Album struct {
 
 var Blockchain *Blockchain
 
+func newAlbum(w http.ResponseWriter, r *http.Request) {
+	var album Album
+	if err := json.NewDecoder(r.Body).Decode(&album); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("could not create: %v", err)
+		w.Write([]byte("could not create new Book"))
+		return
+	}
+
+	h := md5.New()
+	io.WriteString(h, album.Genre+album.Name+album.Artist)
+	album.ID = fmt.Sprintf("%x", h.Sum(nil))
+
+	resp, err := json.MarshalIndent(album, "", " ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("could not marshal payload: %v", err)
+		w.Write([]byte("could not save book data"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", getBlockchain).Methods("GET")
 	r.HandleFunc("/", writeBlock).Methods("POST")
-	r.HandleFunc("/new", newBook).Methods("POST")
+	r.HandleFunc("/new", newAlbum).Methods("POST")
 
 	log.Println("listening on port 3000 ...")
 	log.Fatal(http.ListenAndServe(":3000", r))
