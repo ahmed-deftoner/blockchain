@@ -2,6 +2,8 @@ package main
 
 import (
 	"crypto/md5"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,6 +42,14 @@ type Album struct {
 }
 
 var blockchain *Blockchain
+
+func (b *Block) generateHash() {
+	bytes, _ := json.Marshal(b.Data)
+	data := string(b.Pos) + b.Timestamp + string(bytes) + b.PrevHash
+	hash := sha256.New()
+	hash.Write([]byte(data))
+	b.Hash = hex.EncodeToString(hash.Sum(nil))
+}
 
 func CreateBlock(prevBlock *Block, checkoutItem AlbumCheckout) *Block {
 	block := &Block{}
