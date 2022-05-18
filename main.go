@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -39,6 +40,16 @@ type Album struct {
 }
 
 var blockchain *Blockchain
+
+func CreateBlock(prevBlock *Block, checkoutItem AlbumCheckout) *Block {
+	block := &Block{}
+	block.Pos = prevBlock.Pos + 1
+	block.Timestamp = time.Now().String()
+	block.Data = checkoutItem
+	block.PrevHash = prevBlock.Hash
+	block.generateHash()
+	return block
+}
 
 func (bc *Blockchain) AddBlock(data AlbumCheckout) {
 
