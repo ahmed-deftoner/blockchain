@@ -41,7 +41,7 @@ type Album struct {
 	Genre       string `json:"genre"`
 }
 
-var blockchain *Blockchain
+var BlockChain *Blockchain
 
 func (b *Block) generateHash() {
 	bytes, _ := json.Marshal(b.Data)
@@ -155,6 +155,18 @@ func main() {
 	r.HandleFunc("/", getBlockchain).Methods("GET")
 	r.HandleFunc("/", writeBlock).Methods("POST")
 	r.HandleFunc("/new", newAlbum).Methods("POST")
+
+	go func() {
+
+		for _, block := range BlockChain.blocks {
+			fmt.Printf("Prev. hash: %x\n", block.PrevHash)
+			bytes, _ := json.MarshalIndent(block.Data, "", " ")
+			fmt.Printf("Data: %v\n", string(bytes))
+			fmt.Printf("Hash: %x\n", block.Hash)
+			fmt.Println()
+		}
+
+	}()
 
 	log.Println("listening on port 3000 ...")
 	log.Fatal(http.ListenAndServe(":3000", r))
