@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -117,15 +118,40 @@ func isBlockValid(oldBlock, newBlock Block) bool {
 	return true
 }
 
+func generateBlock(oldblock Block, data string) Block {
+	newblock := Block{}
+	t := time.Now()
+	newblock.Index = oldblock.Index + 1
+	newblock.Timestamp = t.String()
+	newblock.Data = data
+	newblock.Prevhash = oldblock.Hash
+	newblock.Difficulty = difficulty
+
+	for i := 0; ; i++ {
+		hex := fmt.Sprintf("%x", i)
+		newblock.Nonce = hex
+		if !isValidHash(calculateHash(newblock), newblock.Difficulty) {
+			fmt.Println(calculateHash(newblock), "keep mining")
+			time.Sleep(time.Second)
+			continue
+		} else {
+			fmt.Println(calculateHash(newblock), "mining complete")
+			newblock.Hash = calculateHash(newblock)
+			break
+		}
+	}
+	return newblock
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
 	go func() {
-		time := time.Now()
+		t := time.Now()
 		genesisBlock := Block{}
-		genesisBlock = Block{0, time.String(), "", calculateHash(genesisBlock), "", "", difficulty}
+		genesisBlock = Block{0, t.String(), "", calculateHash(genesisBlock), "", "", difficulty}
 		spew.Dump(genesisBlock)
 
 		mutex.Lock()
