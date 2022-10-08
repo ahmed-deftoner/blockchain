@@ -3,8 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -22,8 +24,17 @@ type Block struct {
 
 var blockchain []Block
 
-func run() http.Handler {
+var mutex = &sync.Mutex{}
 
+func run() error {
+
+}
+
+func makeMuxRoutes() http.Handler {
+	router := mux.NewRouter()
+	router.HandleFunc("/", handleGetBlockchain).Methods("GET")
+	router.HandleFunc("/", handlePostBlock).Methods("POST")
+	return router
 }
 
 func calculateHash(b Block) string {
@@ -39,6 +50,9 @@ func main() {
 		time := time.Now()
 		genesisBlock := Block{}
 		genesisBlock = Block{0, time.String(), "", calculateHash(genesisBlock), "", "", difficulty}
+		mutex.Lock()
 		blockchain = append(blockchain, genesisBlock)
+		mutex.Unlock()
 	}()
+	log.Fatal(run())
 }
