@@ -66,6 +66,19 @@ func calculateHash(b Block) string {
 	return ""
 }
 
+func isBlockValid(oldBlock, newBlock Block) bool {
+	if oldBlock.Index+1 != newBlock.Index {
+		return false
+	}
+	if oldBlock.Hash != newBlock.Prevhash {
+		return false
+	}
+	if calculateHash(newBlock) != newBlock.Hash {
+		return false
+	}
+	return true
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
