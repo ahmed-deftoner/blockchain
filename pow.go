@@ -89,7 +89,15 @@ func handlePostBlock(w http.ResponseWriter, r *http.Request) {
 }
 
 func respndWithJson(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
-
+	w.Header().Set("Content-Type", "application/json")
+	response, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("HTTP 500: Internal Server Error"))
+		return
+	}
+	w.WriteHeader(code)
+	w.Write(response)
 }
 
 func calculateHash(b Block) string {
