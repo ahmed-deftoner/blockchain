@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -27,7 +28,20 @@ var blockchain []Block
 var mutex = &sync.Mutex{}
 
 func run() error {
-
+	mux := makeMuxRoutes()
+	httpPort := os.Getenv("PORT")
+	log.Printf("Listening on port : %s", httpPort)
+	s := &http.Server{
+		Addr:           ":" + httpPort,
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	if err := s.ListenAndServe(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func makeMuxRoutes() http.Handler {
