@@ -1,4 +1,4 @@
-package main
+package simple
 
 import (
 	"crypto/md5"
@@ -160,7 +160,7 @@ func NewBlockchain() *Blockchain {
 	return &Blockchain{[]*Block{GenesisBlock()}}
 }
 
-func main() {
+func run() {
 	BlockChain := NewBlockchain()
 	r := mux.NewRouter()
 	r.HandleFunc("/", getBlockchain).Methods("GET")
