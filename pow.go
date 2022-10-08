@@ -1,12 +1,15 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -101,10 +104,6 @@ func respndWithJson(w http.ResponseWriter, r *http.Request, code int, payload in
 	w.Write(response)
 }
 
-func calculateHash(b Block) string {
-	return ""
-}
-
 func isBlockValid(oldBlock, newBlock Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
@@ -116,6 +115,14 @@ func isBlockValid(oldBlock, newBlock Block) bool {
 		return false
 	}
 	return true
+}
+
+func calculateHash(block Block) string {
+	record := strconv.Itoa(block.Index) + block.Timestamp + block.Data + block.Prevhash + block.Nonce
+	h := sha256.New()
+	h.Write([]byte(record))
+	hashed := h.Sum(nil)
+	return hex.EncodeToString(hashed)
 }
 
 func generateBlock(oldblock Block, data string) Block {
