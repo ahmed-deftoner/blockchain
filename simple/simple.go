@@ -1,4 +1,4 @@
-package main
+package simple
 
 import (
 	"crypto/md5"
@@ -15,7 +15,7 @@ import (
 )
 
 type Block struct {
-	Pos       string
+	Pos       int
 	Data      AlbumCheckout
 	Timestamp string
 	Hash      string
@@ -160,7 +160,7 @@ func NewBlockchain() *Blockchain {
 	return &Blockchain{[]*Block{GenesisBlock()}}
 }
 
-func main() {
+func run() {
 	BlockChain := NewBlockchain()
 	r := mux.NewRouter()
 	r.HandleFunc("/", getBlockchain).Methods("GET")
