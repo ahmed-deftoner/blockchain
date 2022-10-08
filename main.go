@@ -15,7 +15,7 @@ import (
 )
 
 type Block struct {
-	Pos       string
+	Pos       int
 	Data      AlbumCheckout
 	Timestamp string
 	Hash      string
