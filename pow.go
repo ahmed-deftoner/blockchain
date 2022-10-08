@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -28,6 +29,10 @@ type Block struct {
 var blockchain []Block
 
 var mutex = &sync.Mutex{}
+
+type Message struct {
+	data string
+}
 
 func run() error {
 	mux := makeMuxRoutes()
@@ -62,6 +67,31 @@ func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(bytes))
 }
 
+func handlePostBlock(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var m Message
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&m); err != nil {
+		respndWithJson(w, r, http.StatusBadRequest, r.Body)
+		return
+	}
+	defer r.Body.Close()
+
+	mutex.Lock()
+	newblock := generateBlock(blockchain[len(blockchain)-1], m.data)
+	mutex.Unlock()
+	if isBlockValid(blockchain[len(blockchain)-1], newblock) {
+		blockchain = append(blockchain, newblock)
+		spew.Dump(blockchain)
+	}
+	respndWithJson(w, r, http.StatusCreated, newblock)
+}
+
+func respndWithJson(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+
+}
+
 func calculateHash(b Block) string {
 	return ""
 }
@@ -88,6 +118,8 @@ func main() {
 		time := time.Now()
 		genesisBlock := Block{}
 		genesisBlock = Block{0, time.String(), "", calculateHash(genesisBlock), "", "", difficulty}
+		spew.Dump(genesisBlock)
+
 		mutex.Lock()
 		blockchain = append(blockchain, genesisBlock)
 		mutex.Unlock()
