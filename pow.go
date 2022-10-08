@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -49,6 +51,15 @@ func makeMuxRoutes() http.Handler {
 	router.HandleFunc("/", handleGetBlockchain).Methods("GET")
 	router.HandleFunc("/", handlePostBlock).Methods("POST")
 	return router
+}
+
+func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
+	bytes, err := json.MarshalIndent(blockchain, "", " ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	io.WriteString(w, string(bytes))
 }
 
 func calculateHash(b Block) string {
