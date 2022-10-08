@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -148,6 +149,11 @@ func generateBlock(oldblock Block, data string) Block {
 		}
 	}
 	return newblock
+}
+
+func isValidHash(hash string, difficulty int) bool {
+	prefix := strings.Repeat("0", difficulty)
+	return strings.HasPrefix(hash, prefix)
 }
 
 func main() {
